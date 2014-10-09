@@ -90,7 +90,8 @@ int main(int argc, char* argv[])
     hosts = fopen("hosts", "w");
 
     // Write the content to the hosts file
-    fwrite(new_hosts, 1, 1024, hosts);
+    //fwrite(new_hosts, 1, 1024, hosts);
+    fprintf(hosts, "%s", new_hosts);
 
     fclose(block_file);
     fclose(hosts);
