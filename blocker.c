@@ -5,9 +5,9 @@
 #include "HydroCarbon/stdfn.h"
 #include "HydroCarbon/network.h"
 
-#define FILE_OPEN_ERROR "A file failed to open.\nProcess terminating...\n"
+#define FILE_OPEN_ERROR "A file failed to open.  Did you run with root?\nProcess terminating...\n"
 #define HOSTS_MARKER "# DO NOT MODIFY THIS LINE OR BELOW! These entries are automatically added to prevent access to malicious sites."
-#define VERSION "0.2.0"
+#define VERSION "0.3.0"
 
 int main(int argc, char* argv[])
 {
@@ -18,24 +18,20 @@ int main(int argc, char* argv[])
         char bf_text[1024*500];
         char h_text[1024*500];
         char* h_bs;
-        //char* h_as;
         char* new_hosts;
         int bf_size;
         int h_size;
         char user_agent[512];
-        //char req_cmd[1024];
         char* user = bash("whoami");
         char* hostname = bash("hostname");
 
         sprintf(user_agent, "Krasnaya Security DomainBlocker - Blocked domains definitions update from %s at %s running version %s", user, hostname, VERSION);
-        //sprintf(req_cmd, "curl -A \"%s\" http://redsec.ru/blocked_sites.txt", user_agent);
 
         printf("Getting blocked domain definitions...\n");
-        //request = bash(req_cmd);
         response = request(user_agent, "http://redsec.ru/blocked_sites.txt");
 
         FILE* block_file = fopen(".blocked_sites", "w+b");
-        FILE* hosts = fopen("hosts", "r+b");
+        FILE* hosts = fopen("/etc/hosts", "r+b");
         FILE* hosts_tmp = fopen(".hosts", "w+b");
 
         // Make sure that files can be opened
@@ -109,7 +105,7 @@ int main(int argc, char* argv[])
         fclose(hosts);
         fclose(hosts_tmp);
         printf("\n\n");
-        sleep(5);
+        sleep(3600);
     }
     return 0;
 }
