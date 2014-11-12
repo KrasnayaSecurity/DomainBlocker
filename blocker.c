@@ -1,18 +1,20 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include "stdfn.h"
+#include <stdlib.h>
+#include "HydroCarbon/stdfn.h"
+#include "HydroCarbon/network.h"
 
 #define FILE_OPEN_ERROR "A file failed to open.\nProcess terminating...\n"
 #define HOSTS_MARKER "# DO NOT MODIFY THIS LINE OR BELOW! These entries are automatically added to prevent access to malicious sites."
-#define VERSION "0.1.2"
+#define VERSION "0.2.0"
 
 int main(int argc, char* argv[])
 {
     intro("Site Blocker", "Krasnaya Security", 2014, "MIT");
     while (1)
     {
-        char* request;
+        char* response;
         char bf_text[1024*500];
         char h_text[1024*500];
         char* h_bs;
@@ -21,15 +23,16 @@ int main(int argc, char* argv[])
         int bf_size;
         int h_size;
         char user_agent[512];
-        char req_cmd[1024];
+        //char req_cmd[1024];
         char* user = bash("whoami");
         char* hostname = bash("hostname");
 
         sprintf(user_agent, "Krasnaya Security DomainBlocker - Blocked domains definitions update from %s at %s running version %s", user, hostname, VERSION);
-        sprintf(req_cmd, "curl -A \"%s\" http://redsec.ru/blocked_sites.txt", user_agent);
+        //sprintf(req_cmd, "curl -A \"%s\" http://redsec.ru/blocked_sites.txt", user_agent);
 
         printf("Getting blocked domain definitions...\n");
-        request = bash(req_cmd);
+        //request = bash(req_cmd);
+        response = request(user_agent, "http://redsec.ru/blocked_sites.txt");
 
         FILE* block_file = fopen(".blocked_sites", "w+b");
         FILE* hosts = fopen("hosts", "r+b");
@@ -50,7 +53,7 @@ int main(int argc, char* argv[])
         }
 
         // Print the text of the web request to the temporary .blocked_sites file
-        fprintf(block_file, "Blocked domain definitions:\n------------------------------\n%s\n------------------------------\n", request);
+        fprintf(block_file, "Blocked domain definitions:\n------------------------------\n%s\n------------------------------\n", response);
 
         // Reading .blocked_sites
 
@@ -91,7 +94,7 @@ int main(int argc, char* argv[])
         // Transfer hosts pre seperation to new hosts variable
         new_hosts = h_bs;
         strcat(new_hosts, "\n");
-        strcat(new_hosts, request);
+        strcat(new_hosts, response);
         printf("Final content for hosts file update:\n------------------------------\n%s\n------------------------------\n", new_hosts);
 
         // Closing and reopening the hosts file in a different mode to write to it without appending
